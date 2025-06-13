@@ -13,10 +13,10 @@ local borderColors = {
 }
 local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
--- الصوت
+-- الصوت الجديد
 local clickSound = Instance.new("Sound")
-clickSound.SoundId = "rbxassetid://12222216" -- صوت بسيط (تقدر تغيّره)
-clickSound.Volume = 0.5
+clickSound.SoundId = "rbxassetid://9118823105" -- صوت UI Click احترافي
+clickSound.Volume = 0.75
 clickSound.Name = "ClickSound"
 clickSound.Parent = playerGui
 
@@ -36,11 +36,11 @@ mainFrame.BorderSizePixel = 4
 mainFrame.BorderColor3 = randomBorderColor
 mainFrame.Parent = screenGui
 
--- العنوان
+-- العنوان بدون عربي
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "Core X Hub: The Mercy Script | كور إكس هب"
+title.Text = "Core X Hub: The Mercy Script"
 title.Font = Enum.Font.SourceSansBold
 title.TextColor3 = Color3.new(1, 1, 1)
 title.TextSize = 20
@@ -66,29 +66,26 @@ local pages = {}
 
 pages["Home"] = [[
 Welcome to Core X Hub: The Mercy Script 🌟
-مرحباً بك في كور إكس هب: سكربت ميرسي
 
-⚙️ Features | المميزات:
-- Powerful tools | أدوات قوية
-- Easy to use | سهل الاستخدام
-- Custom sections | أقسام مخصصة
+⚙️ Features:
+- Powerful tools
+- Easy to use
+- Custom sections
 
 👑 Developed by: Core X Team
 ]]
 
 pages["Settings"] = [[
-⚙️ Settings | الإعدادات
+⚙️ Settings
 
-- Coming soon... | قريباً
+- Coming soon...
 ]]
 
 pages["About"] = [[
-📄 About | حول
+📄 About
 
-- Core X Hub is a free Lua script interface.
-- Created for Roblox lovers 💙
-
-كور إكس هب هو سكربت مجاني لمحبي روبلوكس.
+Core X Hub is a free Lua script interface.
+Created for Roblox lovers 💙
 ]]
 
 -- نص الصفحة المعروضة
