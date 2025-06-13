@@ -1,173 +1,277 @@
--- CoreXHub Script UI for Roblox
--- Author: Core X Team
--- Github Project Ready Version
-
 local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local HttpService = game:GetService("HttpService")
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- إنشاء الـ ScreenGui
+-- إعدادات السكربت الأساسية
+local Settings = {
+    HubName = "Core X Hub",
+    Version = "2.0",
+    GitHubRepo = "YOUR_GITHUB_USERNAME/CoreXHub", -- استبدل بمعلومات مستودعك
+    DebugMode = false
+}
+
+-- أصوات محسنة
+local Sounds = {
+    Click = {Id = "rbxassetid://9118823105", Volume = 0.5},
+    Success = {Id = "rbxassetid://6026984224", Volume = 0.7},
+    Error = {Id = "rbxassetid://5419098674", Volume = 0.7},
+    Notification = {Id = "rbxassetid://4590666636", Volume = 0.5}
+}
+
+local function CreateSound(soundData, parent)
+    local sound = Instance.new("Sound")
+    sound.SoundId = soundData.Id
+    sound.Volume = soundData.Volume
+    sound.Parent = parent
+    return sound
+end
+
+-- إنشاء واجهة المستخدم الرئيسية
 local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "CoreXHubGui"
-screenGui.Parent = game.CoreGui -- لضمان عدم اختفاء الواجهة عند الموت
+screenGui.Name = Settings.HubName
+screenGui.ResetOnSpawn = false
+screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+screenGui.Parent = playerGui
 
--- الإطار الرئيسي
+-- إطار رئيسي مع تأثيرات
 local mainFrame = Instance.new("Frame")
-mainFrame.Size = UDim2.new(0, 400, 0, 250)
-mainFrame.Position = UDim2.new(0.5, -200, 0.1, 0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+mainFrame.Size = UDim2.new(0, 500, 0, 350)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 mainFrame.BorderSizePixel = 0
+mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
 
--- رسالة ترحيب
-local welcomeLabel = Instance.new("TextLabel")
-welcomeLabel.Size = UDim2.new(1, -20, 0, 40)
-welcomeLabel.Position = UDim2.new(0, 10, 0, 10)
-welcomeLabel.BackgroundTransparency = 1
-welcomeLabel.TextColor3 = Color3.new(1, 1, 1)
-welcomeLabel.Text = "مرحباً بك في Core X Script Hub"
-welcomeLabel.Font = Enum.Font.ArialBold
-welcomeLabel.TextSize = 24
-welcomeLabel.TextXAlignment = Enum.TextXAlignment.Center
-welcomeLabel.Parent = mainFrame
+-- تأثير ظل
+local uiGradient = Instance.new("UIGradient")
+uiGradient.Rotation = 90
+uiGradient.Transparency = NumberSequence.new({
+    NumberSequenceKeypoint.new(0, 0),
+    NumberSequenceKeypoint.new(1, 0.5)
+})
+uiGradient.Parent = mainFrame
 
--- إطار الصور (صورة المستخدم وصورة حسابه مع حد بينهم)
-local imagesFrame = Instance.new("Frame")
-imagesFrame.Size = UDim2.new(1, -20, 0, 100)
-imagesFrame.Position = UDim2.new(0, 10, 0, 60)
-imagesFrame.BackgroundTransparency = 1
-imagesFrame.Parent = mainFrame
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 8)
+uiCorner.Parent = mainFrame
 
-local function createImageLabel(imageId, position)
-    local imageLabel = Instance.new("ImageLabel")
-    imageLabel.Size = UDim2.new(0, 90, 0, 90)
-    imageLabel.Position = position
-    imageLabel.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-    imageLabel.BorderSizePixel = 2
-    imageLabel.BorderColor3 = Color3.fromRGB(255, 255, 255)
-    imageLabel.Image = imageId
-    imageLabel.ScaleType = Enum.ScaleType.Fit
-    imageLabel.Parent = imagesFrame
-    return imageLabel
-end
+-- شريط العنوان
+local titleBar = Instance.new("Frame")
+titleBar.Size = UDim2.new(1, 0, 0, 30)
+titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+titleBar.BorderSizePixel = 0
+titleBar.Parent = mainFrame
 
-local userAvatarImageId = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=420&h=420"
-local userImage = createImageLabel(userAvatarImageId, UDim2.new(0, 0, 0, 0))
-local robloxImage = createImageLabel(userAvatarImageId, UDim2.new(0, 110, 0, 0))
+local titleCorner = Instance.new("UICorner")
+titleCorner.CornerRadius = UDim.new(0, 8)
+titleCorner.Parent = titleBar
 
--- حد (Divider) بين الصورتين
-local divider = Instance.new("Frame")
-divider.Size = UDim2.new(0, 2, 1, 0)
-divider.Position = UDim2.new(0, 100, 0, 0)
-divider.BackgroundColor3 = Color3.new(1, 1, 1)
-divider.BackgroundTransparency = 0.7
-divider.Parent = imagesFrame
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -60, 1, 0)
+title.BackgroundTransparency = 1
+title.Text = Settings.HubName .. " v" .. Settings.Version
+title.Font = Enum.Font.GothamBold
+title.TextColor3 = Color3.new(1, 1, 1)
+title.TextSize = 14
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = titleBar
 
--- قسم Player Info
-local playerInfoFrame = Instance.new("Frame")
-playerInfoFrame.Size = UDim2.new(1, -20, 0, 110)
-playerInfoFrame.Position = UDim2.new(0, 10, 0, 170)
-playerInfoFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-playerInfoFrame.BorderSizePixel = 0
-playerInfoFrame.Parent = mainFrame
+local closeButton = Instance.new("TextButton")
+closeButton.Size = UDim2.new(0, 30, 0, 30)
+closeButton.Position = UDim2.new(1, -30, 0, 0)
+closeButton.BackgroundTransparency = 1
+closeButton.Text = "×"
+closeButton.Font = Enum.Font.GothamBold
+closeButton.TextColor3 = Color3.new(1, 1, 1)
+closeButton.TextSize = 20
+closeButton.Parent = titleBar
 
--- صورة اللاعب بجانب مربع الكتابة
-local playerImage = Instance.new("ImageLabel")
-playerImage.Size = UDim2.new(0, 60, 0, 60)
-playerImage.Position = UDim2.new(0, 10, 0, 10)
-playerImage.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-playerImage.BorderSizePixel = 1
-playerImage.BorderColor3 = Color3.fromRGB(255, 255, 255)
-playerImage.Image = ""
-playerImage.ScaleType = Enum.ScaleType.Fit
-playerImage.Parent = playerInfoFrame
+-- القائمة الجانبية
+local sideMenu = Instance.new("Frame")
+sideMenu.Size = UDim2.new(0, 120, 1, -30)
+sideMenu.Position = UDim2.new(0, 0, 0, 30)
+sideMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+sideMenu.BorderSizePixel = 0
+sideMenu.Parent = mainFrame
 
--- مربع نص لاختيار اللاعب (يدعم الكتابة وحفظ أول حروف للاسم)
-local playerTextBox = Instance.new("TextBox")
-playerTextBox.Size = UDim2.new(1, -90, 0, 60)
-playerTextBox.Position = UDim2.new(0, 80, 0, 10)
-playerTextBox.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
-playerTextBox.TextColor3 = Color3.new(1, 1, 1)
-playerTextBox.Font = Enum.Font.Arial
-playerTextBox.TextSize = 22
-playerTextBox.PlaceholderText = "أكتب اسم اللاعب هنا"
-playerTextBox.ClearTextOnFocus = false
-playerTextBox.Parent = playerInfoFrame
+-- محتوى الصفحات
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -130, 1, -40)
+contentFrame.Position = UDim2.new(0, 130, 0, 35)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
 
--- أزرار الأوامر أسفل مربع النص
-local buttonNames = {"طرده", "نقله لك", "تنقله لك", "VIEW"}
-local buttons = {}
+local tabButtons = {}
+local currentTab = "Home"
 
-for i, name in ipairs(buttonNames) do
+-- نظام الصفحات المطور
+local Tabs = {
+    Home = {
+        Create = function(parent)
+            local container = Instance.new("Frame")
+            container.Size = UDim2.new(1, 0, 1, 0)
+            container.BackgroundTransparency = 1
+            container.Parent = parent
+            
+            local welcomeLabel = Instance.new("TextLabel")
+            welcomeLabel.Size = UDim2.new(1, -20, 0, 60)
+            welcomeLabel.Position = UDim2.new(0, 10, 0, 10)
+            welcomeLabel.BackgroundTransparency = 1
+            welcomeLabel.Text = "مرحبًا بك في " .. Settings.HubName
+            welcomeLabel.Font = Enum.Font.GothamBold
+            welcomeLabel.TextColor3 = Color3.fromRGB(0, 162, 255)
+            welcomeLabel.TextSize = 18
+            welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
+            welcomeLabel.Parent = container
+            
+            -- يمكن إضافة عناصر واجهة مستخدم إضافية هنا
+        end
+    },
+    Scripts = {
+        Create = function(parent)
+            local container = Instance.new("Frame")
+            container.Size = UDim2.new(1, 0, 1, 0)
+            container.BackgroundTransparency = 1
+            container.Parent = parent
+            
+            -- قائمة السكربتات ستضاف هنا ديناميكيًا
+            local loadingText = Instance.new("TextLabel")
+            loadingText.Size = UDim2.new(1, 0, 1, 0)
+            loadingText.BackgroundTransparency = 1
+            loadingText.Text = "جاري تحميل السكربتات..."
+            loadingText.Font = Enum.Font.Gotham
+            loadingText.TextColor3 = Color3.new(1, 1, 1)
+            loadingText.TextSize = 16
+            loadingText.Parent = container
+            
+            -- سوف يتم ملء هذه القائمة من GitHub
+        end
+    },
+    Settings = {
+        Create = function(parent)
+            local container = Instance.new("Frame")
+            container.Size = UDim2.new(1, 0, 1, 0)
+            container.BackgroundTransparency = 1
+            container.Parent = parent
+            
+            local title = Instance.new("TextLabel")
+            title.Size = UDim2.new(1, -20, 0, 30)
+            title.Position = UDim2.new(0, 10, 0, 10)
+            title.BackgroundTransparency = 1
+            title.Text = "الإعدادات"
+            title.Font = Enum.Font.GothamBold
+            title.TextColor3 = Color3.new(1, 1, 1)
+            title.TextSize = 18
+            title.TextXAlignment = Enum.TextXAlignment.Left
+            title.Parent = container
+            
+            -- إضافة عناصر الإعدادات هنا
+        end
+    }
+}
+
+-- إنشاء أزرار التبويب
+local function CreateTabButton(name, yPos)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(0, 80, 0, 30)
-    btn.Position = UDim2.new(0, 10 + (i - 1) * 90, 0, 80)
-    btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
-    btn.TextColor3 = Color3.new(1, 1, 1)
-    btn.Font = Enum.Font.ArialBold
-    btn.TextSize = 18
+    btn.Size = UDim2.new(1, -10, 0, 35)
+    btn.Position = UDim2.new(0, 5, 0, yPos)
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.BorderSizePixel = 0
     btn.Text = name
-    btn.Parent = playerInfoFrame
-    buttons[name] = btn
-end
-
--- وظيفة للبحث عن لاعب بناءً على بداية الاسم (case insensitive)
-local function findPlayerByPartialName(partial)
-    if partial == "" then return nil end
-    partial = partial:lower()
-    for _, plr in pairs(Players:GetPlayers()) do
-        if plr.Name:lower():sub(1, #partial) == partial then
-            return plr
+    btn.Font = Enum.Font.Gotham
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextSize = 14
+    btn.Parent = sideMenu
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 4)
+    btnCorner.Parent = btn
+    
+    btn.MouseEnter:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+            BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+        }):Play()
+    end)
+    
+    btn.MouseLeave:Connect(function()
+        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+            BackgroundColor3 = currentTab == name and Color3.fromRGB(0, 90, 150) or Color3.fromRGB(30, 30, 30)
+        }):Play()
+    end)
+    
+    btn.MouseButton1Click:Connect(function()
+        if currentTab ~= name then
+            currentTab = name
+            -- تحديث الواجهة حسب التبويب المحدد
         end
-    end
-    return nil
+    end)
+    
+    tabButtons[name] = btn
 end
 
--- تحديث صورة اللاعب حسب الاسم المكتوب
-local function updatePlayerImage()
-    local plr = findPlayerByPartialName(playerTextBox.Text)
-    if plr then
-        playerImage.Image = "rbxthumb://type=AvatarHeadShot&id=" .. plr.UserId .. "&w=420&h=420"
+-- إنشاء تبويبات الواجهة
+CreateTabButton("Home", 10)
+CreateTabButton("Scripts", 50)
+CreateTabButton("Settings", 90)
+
+-- نظام التحميل من GitHub
+local function LoadScriptFromGitHub(scriptPath)
+    local success, result = pcall(function()
+        local url = "https://raw.githubusercontent.com/" .. Settings.GitHubRepo .. "/main/" .. scriptPath
+        if Settings.DebugMode then
+            print("محاولة تحميل السكربت من:", url)
+        end
+        local response = game:HttpGet(url, true)
+        return response
+    end)
+    
+    if success then
+        return result
     else
-        playerImage.Image = ""
+        warn("فشل تحميل السكربت:", result)
+        return nil
     end
 end
 
-playerTextBox:GetPropertyChangedSignal("Text"):Connect(updatePlayerImage)
-
--- أفعال الأزرار
-buttons["طرده"].MouseButton1Click:Connect(function()
-    local plr = findPlayerByPartialName(playerTextBox.Text)
-    if plr then
-        -- تنفيذ أمر الطرد (يحتاج صلاحيات خاصة)
-        local success, err = pcall(function()
-            game.ReplicatedStorage.DefaultChatSystemChatEvents.SayMessageRequest:FireServer("/kick " .. plr.Name, "All")
-        end)
-        if not success then
-            warn("فشل تنفيذ أمر الطرد: " .. tostring(err))
-        end
+-- نظام الإشعارات المحسن
+local function ShowNotification(title, text, notificationType)
+    local icon = "rbxassetid://7733658504" -- أيقونة افتراضية
+    if notificationType == "error" then
+        icon = "rbxassetid://7733660490"
+    elseif notificationType == "warning" then
+        icon = "rbxassetid://7733686865"
     end
+    
+    StarterGui:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = 5,
+        Icon = icon
+    })
+end
+
+-- إخفاء/إظهار الواجهة
+closeButton.MouseButton1Click:Connect(function()
+    game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.2), {
+        Size = UDim2.new(0, 0, 0, 0)
+    }):Play()
+    wait(0.2)
+    screenGui:Destroy()
 end)
 
-buttons["نقله لك"].MouseButton1Click:Connect(function()
-    local plr = findPlayerByPartialName(playerTextBox.Text)
-    if plr and plr.Character and LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChild("HumanoidRootPart") then
-        LocalPlayer.Character.HumanoidRootPart.CFrame = plr.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
+-- التحقق من التحديثات
+local function CheckForUpdates()
+    local versionFile = LoadScriptFromGitHub("version.txt")
+    if versionFile and versionFile ~= Settings.Version then
+        ShowNotification("تحديث متاح", "الإصدار "..versionFile.." متاح الآن!", "info")
+        -- يمكن إضافة منطق التحديث التلقائي هنا
     end
-end)
+end
 
-buttons["تنقله لك"].MouseButton1Click:Connect(function()
-    local plr = findPlayerByPartialName(playerTextBox.Text)
-    if plr and plr.Character and LocalPlayer.Character and plr.Character:FindFirstChild("HumanoidRootPart") and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
-        plr.Character.HumanoidRootPart.CFrame = LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(3, 0, 3)
-    end
-end)
-
-buttons["VIEW"].MouseButton1Click:Connect(function()
-    local plr = findPlayerByPartialName(playerTextBox.Text)
-    if plr then
-        -- هنا تضع كود التنقل للسيرفر الخاص باللاعب (بحسب API موجودة لديك)
-        print("طلب عرض اللاعب:", plr.Name)
-        -- مثال:
-        -- TeleportService:TeleportToPlaceInstance(placeId, plr.GameId, LocalPlayer)
-    end
-end)
+-- تهيئة الواجهة
+Tabs.Home.Create(contentFrame)
+CheckForUpdates()
