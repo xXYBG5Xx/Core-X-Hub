@@ -1,9 +1,26 @@
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ألوان الحواف
+-- أصوات
+local clickSound = Instance.new("Sound")
+clickSound.SoundId = "rbxassetid://9118823105"
+clickSound.Volume = 1
+clickSound.Parent = playerGui
+
+local successSound = Instance.new("Sound")
+successSound.SoundId = "rbxassetid://6026984224"
+successSound.Volume = 1
+successSound.Parent = playerGui
+
+local failSound = Instance.new("Sound")
+failSound.SoundId = "rbxassetid://5419098674"
+failSound.Volume = 1
+failSound.Parent = playerGui
+
+-- ألوان حواف عشوائية
 local borderColors = {
 	Color3.fromRGB(255, 0, 0),
 	Color3.fromRGB(0, 255, 0),
@@ -13,14 +30,7 @@ local borderColors = {
 }
 local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
--- الصوت الجديد
-local clickSound = Instance.new("Sound")
-clickSound.SoundId = "rbxassetid://9118823105" -- صوت UI Click احترافي
-clickSound.Volume = 0.75
-clickSound.Name = "ClickSound"
-clickSound.Parent = playerGui
-
--- GUI
+-- GUI الرئيسي
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CoreXHub"
 screenGui.ResetOnSpawn = false
@@ -34,13 +44,14 @@ mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 4
 mainFrame.BorderColor3 = randomBorderColor
+mainFrame.Visible = true
 mainFrame.Parent = screenGui
 
--- العنوان بدون عربي
+-- العنوان
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 30)
 title.BackgroundTransparency = 1
-title.Text = "Core X Hub: The Mercy Script"
+title.Text = "Core X Hub"
 title.Font = Enum.Font.SourceSansBold
 title.TextColor3 = Color3.new(1, 1, 1)
 title.TextSize = 20
@@ -61,34 +72,7 @@ contentFrame.Position = UDim2.new(0, 140, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
 
--- محتويات كل صفحة
-local pages = {}
-
-pages["Home"] = [[
-Welcome to Core X Hub: The Mercy Script 🌟
-
-⚙️ Features:
-- Powerful tools
-- Easy to use
-- Custom sections
-
-👑 Developed by: Core X Team
-]]
-
-pages["Settings"] = [[
-⚙️ Settings
-
-- Coming soon...
-]]
-
-pages["About"] = [[
-📄 About
-
-Core X Hub is a free Lua script interface.
-Created for Roblox lovers 💙
-]]
-
--- نص الصفحة المعروضة
+-- محتوى الصفحة
 local contentLabel = Instance.new("TextLabel")
 contentLabel.Size = UDim2.new(1, 0, 1, 0)
 contentLabel.BackgroundTransparency = 1
@@ -98,14 +82,21 @@ contentLabel.TextXAlignment = Enum.TextXAlignment.Left
 contentLabel.Font = Enum.Font.SourceSans
 contentLabel.TextSize = 18
 contentLabel.TextColor3 = Color3.new(1, 1, 1)
-contentLabel.Text = pages["Home"]
+contentLabel.Text = "Welcome to Core X Hub!\n\n🌟 Powerful features\n👑 Made by Core X Team"
 contentLabel.Parent = contentFrame
 
--- زرار القائمة
-local function createSideButton(name, yPosition)
+-- الصفحات
+local pages = {
+	["Home"] = "Welcome to Core X Hub!\n\n🌟 Powerful features\n👑 Made by Core X Team",
+	["Settings"] = "⚙️ Settings\n\n- Customize your experience.",
+	["About"] = "📄 About\n\nThis hub is created for Roblox users.\n- Developer: Core X Team"
+}
+
+-- إنشاء أزرار جانبية
+local function createSideButton(name, yPos)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, -20, 0, 35)
-	btn.Position = UDim2.new(0, 10, 0, yPosition)
+	btn.Position = UDim2.new(0, 10, 0, yPos)
 	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	btn.BorderSizePixel = 0
 	btn.Text = name
@@ -114,31 +105,29 @@ local function createSideButton(name, yPosition)
 	btn.TextSize = 18
 	btn.Parent = sideMenu
 
-	local function animatePage()
-		clickSound:Play()
-		local tweenOut = TweenService:Create(contentLabel, TweenInfo.new(0.25), {TextTransparency = 1})
-		tweenOut:Play()
-		tweenOut.Completed:Wait()
-		contentLabel.Text = pages[name:match("^([^|]+)"):gsub("%s+", "")] or "No content"
-		local tweenIn = TweenService:Create(contentLabel, TweenInfo.new(0.25), {TextTransparency = 0})
-		tweenIn:Play()
-	end
-
-	btn.MouseButton1Click:Connect(animatePage)
-
 	btn.MouseEnter:Connect(function()
 		btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
 	end)
 	btn.MouseLeave:Connect(function()
 		btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	end)
+
+	btn.MouseButton1Click:Connect(function()
+		clickSound:Play()
+		local tweenOut = TweenService:Create(contentLabel, TweenInfo.new(0.2), {TextTransparency = 1})
+		tweenOut:Play()
+		tweenOut.Completed:Wait()
+		contentLabel.Text = pages[name] or "No content"
+		local tweenIn = TweenService:Create(contentLabel, TweenInfo.new(0.2), {TextTransparency = 0})
+		tweenIn:Play()
+	end)
 end
 
-createSideButton("Home | الرئيسية", 10)
-createSideButton("Settings | الإعدادات", 55)
-createSideButton("About | حول", 100)
+createSideButton("Home", 10)
+createSideButton("Settings", 55)
+createSideButton("About", 100)
 
--- زر إخفاء/إظهار
+-- زر الإخفاء والإظهار
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 40, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
@@ -162,3 +151,29 @@ toggleButton.MouseButton1Click:Connect(function()
 	mainFrame.Visible = guiVisible
 	toggleButton.Text = guiVisible and "×" or "☰"
 end)
+
+-- إشعار صوتي مرئي عند جلب السكربت
+local function showNotification(title, text, success)
+	StarterGui:SetCore("SendNotification", {
+		Title = title;
+		Text = text;
+		Duration = 4;
+		Icon = success and "rbxassetid://7733658504" or "rbxassetid://7733660490";
+	})
+	if success then
+		successSound:Play()
+	else
+		failSound:Play()
+	end
+end
+
+-- تجربة تحميل السكربت
+local success, err = pcall(function()
+	loadstring("print('Script Loaded from Server!')")()
+end)
+
+if success then
+	showNotification("Core X Hub", "Script Loaded Successfully!", true)
+else
+	showNotification("Core X Hub", "Failed to load script.", false)
+end
