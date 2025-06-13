@@ -1,3 +1,6 @@
+-- Core X Hub - إصدار احترافي
+-- بواسطة Zeus 
+
 -- الخدمات
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -15,64 +18,87 @@ clickSound.SoundId = "rbxassetid://9118823107"
 local notifySound = Instance.new("Sound", SoundService)
 notifySound.SoundId = "rbxassetid://6026984224"
 
--- Main GUI
-local CoreGui = Instance.new("ScreenGui", playerGui)
+-- شاشة GUI
+local CoreGui = Instance.new("ScreenGui")
 CoreGui.Name = "CoreXHub"
 CoreGui.ResetOnSpawn = false
+CoreGui.Parent = playerGui
 
--- زر الإخفاء/الإظهار
-local toggleKey = Enum.KeyCode.B
-local visible = true
-UserInputService.InputBegan:Connect(function(input, gpe)
-	if gpe then return end
-	if input.KeyCode == toggleKey then
-		visible = not visible
-		CoreGui.Enabled = visible
-	end
-end)
+-- تأثير Blur خلف الواجهة
+local blur = Instance.new("BlurEffect")
+blur.Size = 12
+blur.Parent = game.Lighting
 
--- خلفية
-local MainFrame = Instance.new("Frame", CoreGui)
+-- زر البرقر (☰)
+local ToggleButton = Instance.new("TextButton")
+ToggleButton.Size = UDim2.new(0, 40, 0, 40)
+ToggleButton.Position = UDim2.new(0, 10, 0.5, -20)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+ToggleButton.Text = "☰"
+ToggleButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+ToggleButton.Font = Enum.Font.GothamBold
+ToggleButton.TextSize = 24
+ToggleButton.AutoButtonColor = true
+ToggleButton.ZIndex = 10
+ToggleButton.Parent = CoreGui
+Instance.new("UICorner", ToggleButton).CornerRadius = UDim.new(1, 0)
+
+-- الإطار الرئيسي
+local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 650, 0, 330)
 MainFrame.Position = UDim2.new(0.5, -325, 0.5, -165)
-MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 MainFrame.BorderSizePixel = 0
 MainFrame.BackgroundTransparency = 0.05
+MainFrame.Parent = CoreGui
+MainFrame.Visible = true
+Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
+MainFrame.ClipsDescendants = true
 
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 8)
+-- Animation عند الفتح
+MainFrame.Size = UDim2.new(0, 0, 0, 0)
+TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {
+    Size = UDim2.new(0, 650, 0, 330)
+}):Play()
 
--- القائمة الجانبية
+-- قائمة التبويبات الجانبية
 local SideBar = Instance.new("Frame", MainFrame)
 SideBar.Size = UDim2.new(0, 150, 1, 0)
-SideBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 4)
+SideBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 8)
 
--- Tabs
+-- تبويبات
 local tabs = {
-	"Home | القائمة الرئيسية",
-	"Game | التخريب",
-	"Character | اللاعب",
-	"Target | استهداف",
-	"Anims | انميشنات",
-	"Misc | أخرى",
-	"Credits | الحقوق"
+	"Home",
+	"Game",
+	"Character",
+	"Target",
+	"Anims",
+	"Misc",
+	"Credits"
 }
 
 for i, text in ipairs(tabs) do
 	local tab = Instance.new("TextButton", SideBar)
-	tab.Size = UDim2.new(1, -10, 0, 30)
-	tab.Position = UDim2.new(0, 5, 0, (i - 1) * 35 + 10)
+	tab.Size = UDim2.new(1, -20, 0, 32)
+	tab.Position = UDim2.new(0, 10, 0, (i - 1) * 40 + 10)
 	tab.Text = text
 	tab.Font = Enum.Font.GothamSemibold
 	tab.TextColor3 = Color3.fromRGB(255, 255, 255)
 	tab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	tab.TextSize = 14
 	tab.AutoButtonColor = false
+	Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 6)
+
 	tab.MouseButton1Click:Connect(function()
 		clickSound:Play()
+		for _, other in pairs(SideBar:GetChildren()) do
+			if other:IsA("TextButton") then
+				other.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+			end
+		end
+		tab.BackgroundColor3 = Color3.fromRGB(70, 130, 180) -- لون مميز للمحدد
 	end)
-	Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 4)
 end
 
 -- الصفحة الرئيسية
@@ -89,9 +115,9 @@ Avatar.Position = UDim2.new(0, 10, 0, 10)
 Avatar.Image = thumb
 Avatar.BackgroundTransparency = 1
 
--- بيانات
+-- معلومات اللاعب
 local Info = Instance.new("TextLabel", HomeFrame)
-Info.Text = "@"..player.DisplayName.."\nاضغط [B] لاخفاء الواجهة\nFree User : حالة الاشتراك\nللاشتراك تفضل دسكورد Core X"
+Info.Text = "@"..player.DisplayName.."\nاضغط [☰] لاخفاء/إظهار الواجهة\nFree User : حالة الاشتراك\nللاشتراك تفضل دسكورد Core X"
 Info.Position = UDim2.new(0, 120, 0, 10)
 Info.Size = UDim2.new(1, -130, 0, 100)
 Info.Font = Enum.Font.Gotham
@@ -111,10 +137,10 @@ Box.Text = [[جميع الحقوق محفوظة لسيرفر Core X
 Box.Font = Enum.Font.Gotham
 Box.TextSize = 16
 Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-Box.BackgroundTransparency = 0.4
+Box.BackgroundTransparency = 0.3
 Box.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Box.TextWrapped = true
-Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 6)
 
 -- إشعار ترحيبي
 StarterGui:SetCore("SendNotification", {
@@ -123,3 +149,13 @@ StarterGui:SetCore("SendNotification", {
 	Duration = 5
 })
 notifySound:Play()
+
+-- التحكم بزر البرقر
+local opened = true
+ToggleButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
+	opened = not opened
+	TweenService:Create(MainFrame, TweenInfo.new(0.35, Enum.EasingStyle.Sine), {
+		Size = opened and UDim2.new(0, 650, 0, 330) or UDim2.new(0, 0, 0, 0)
+	}):Play()
+end)
