@@ -8,26 +8,22 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- إعدادات السكربت الأساسية
 local Settings = {
     HubName = "Core X Hub",
-    Version = "2.0",
-    GitHubRepo = "YOUR_GITHUB_USERNAME/CoreXHub", -- استبدل بمعلومات مستودعك
+    Version = "2.1",
+    GitHubRepo = "YOUR_GITHUB_USERNAME/CoreXHub",
     DebugMode = false
 }
 
--- أصوات محسنة
-local Sounds = {
-    Click = {Id = "rbxassetid://9118823105", Volume = 0.5},
-    Success = {Id = "rbxassetid://6026984224", Volume = 0.7},
-    Error = {Id = "rbxassetid://5419098674", Volume = 0.7},
-    Notification = {Id = "rbxassetid://4590666636", Volume = 0.5}
+-- ألوان حواف عشوائية
+local borderColors = {
+    Color3.fromRGB(255, 0, 0),
+    Color3.fromRGB(0, 255, 0),
+    Color3.fromRGB(0, 0, 255),
+    Color3.fromRGB(255, 255, 0),
+    Color3.fromRGB(0, 255, 255),
+    Color3.fromRGB(255, 0, 255),
+    Color3.fromRGB(128, 0, 128)
 }
-
-local function CreateSound(soundData, parent)
-    local sound = Instance.new("Sound")
-    sound.SoundId = soundData.Id
-    sound.Volume = soundData.Volume
-    sound.Parent = parent
-    return sound
-end
+local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
 -- إنشاء واجهة المستخدم الرئيسية
 local screenGui = Instance.new("ScreenGui")
@@ -36,24 +32,16 @@ screenGui.ResetOnSpawn = false
 screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 screenGui.Parent = playerGui
 
--- إطار رئيسي مع تأثيرات
+-- إطار رئيسي مع حواف ملونة عشوائية
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 500, 0, 350)
 mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-mainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 4
+mainFrame.BorderColor3 = randomBorderColor
 mainFrame.ClipsDescendants = true
 mainFrame.Parent = screenGui
-
--- تأثير ظل
-local uiGradient = Instance.new("UIGradient")
-uiGradient.Rotation = 90
-uiGradient.Transparency = NumberSequence.new({
-    NumberSequenceKeypoint.new(0, 0),
-    NumberSequenceKeypoint.new(1, 0.5)
-})
-uiGradient.Parent = mainFrame
 
 local uiCorner = Instance.new("UICorner")
 uiCorner.CornerRadius = UDim.new(0, 8)
@@ -62,13 +50,9 @@ uiCorner.Parent = mainFrame
 -- شريط العنوان
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
-titleBar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 titleBar.BorderSizePixel = 0
 titleBar.Parent = mainFrame
-
-local titleCorner = Instance.new("UICorner")
-titleCorner.CornerRadius = UDim.new(0, 8)
-titleCorner.Parent = titleBar
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, -60, 1, 0)
@@ -80,21 +64,22 @@ title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
-local closeButton = Instance.new("TextButton")
-closeButton.Size = UDim2.new(0, 30, 0, 30)
-closeButton.Position = UDim2.new(1, -30, 0, 0)
-closeButton.BackgroundTransparency = 1
-closeButton.Text = "×"
-closeButton.Font = Enum.Font.GothamBold
-closeButton.TextColor3 = Color3.new(1, 1, 1)
-closeButton.TextSize = 20
-closeButton.Parent = titleBar
+-- زر التبديل (إظهار/إخفاء)
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 30, 0, 30)
+toggleButton.Position = UDim2.new(1, -30, 0, 0)
+toggleButton.BackgroundTransparency = 1
+toggleButton.Text = "×"
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextColor3 = Color3.new(1, 1, 1)
+toggleButton.TextSize = 20
+toggleButton.Parent = titleBar
 
 -- القائمة الجانبية
 local sideMenu = Instance.new("Frame")
 sideMenu.Size = UDim2.new(0, 120, 1, -30)
 sideMenu.Position = UDim2.new(0, 0, 0, 30)
-sideMenu.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+sideMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 sideMenu.BorderSizePixel = 0
 sideMenu.Parent = mainFrame
 
@@ -108,7 +93,7 @@ contentFrame.Parent = mainFrame
 local tabButtons = {}
 local currentTab = "Home"
 
--- نظام الصفحات المطور
+-- نظام الصفحات
 local Tabs = {
     Home = {
         Create = function(parent)
@@ -128,7 +113,17 @@ local Tabs = {
             welcomeLabel.TextXAlignment = Enum.TextXAlignment.Left
             welcomeLabel.Parent = container
             
-            -- يمكن إضافة عناصر واجهة مستخدم إضافية هنا
+            local descLabel = Instance.new("TextLabel")
+            descLabel.Size = UDim2.new(1, -20, 0, 100)
+            descLabel.Position = UDim2.new(0, 10, 0, 80)
+            descLabel.BackgroundTransparency = 1
+            descLabel.Text = "🌟 مركز سكربتات متكامل\n\n👑 صنع بكل فخر بواسطة Core X Team"
+            descLabel.Font = Enum.Font.Gotham
+            descLabel.TextColor3 = Color3.new(1, 1, 1)
+            descLabel.TextSize = 16
+            descLabel.TextXAlignment = Enum.TextXAlignment.Left
+            descLabel.TextYAlignment = Enum.TextYAlignment.Top
+            descLabel.Parent = container
         end
     },
     Scripts = {
@@ -138,7 +133,6 @@ local Tabs = {
             container.BackgroundTransparency = 1
             container.Parent = parent
             
-            -- قائمة السكربتات ستضاف هنا ديناميكيًا
             local loadingText = Instance.new("TextLabel")
             loadingText.Size = UDim2.new(1, 0, 1, 0)
             loadingText.BackgroundTransparency = 1
@@ -148,7 +142,7 @@ local Tabs = {
             loadingText.TextSize = 16
             loadingText.Parent = container
             
-            -- سوف يتم ملء هذه القائمة من GitHub
+            -- سيتم ملء هذه القائمة من GitHub لاحقًا
         end
     },
     Settings = {
@@ -174,12 +168,12 @@ local Tabs = {
     }
 }
 
--- إنشاء أزرار التبويب
+-- إنشاء أزرار التبويب مع تغيير اللون عند التحديد
 local function CreateTabButton(name, yPos)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, -10, 0, 35)
     btn.Position = UDim2.new(0, 5, 0, yPos)
-    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.BackgroundColor3 = name == "Home" and Color3.fromRGB(0, 90, 150) or Color3.fromRGB(40, 40, 40)
     btn.BorderSizePixel = 0
     btn.Text = name
     btn.Font = Enum.Font.Gotham
@@ -192,21 +186,44 @@ local function CreateTabButton(name, yPos)
     btnCorner.Parent = btn
     
     btn.MouseEnter:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
-            BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-        }):Play()
+        if currentTab ~= name then
+            game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+                BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+            }):Play()
+        end
     end)
     
     btn.MouseLeave:Connect(function()
-        game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
-            BackgroundColor3 = currentTab == name and Color3.fromRGB(0, 90, 150) or Color3.fromRGB(30, 30, 30)
-        }):Play()
+        if currentTab ~= name then
+            game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+                BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            }):Play()
+        end
     end)
     
     btn.MouseButton1Click:Connect(function()
         if currentTab ~= name then
+            -- تغيير لون الزر المحدد
+            game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+                BackgroundColor3 = Color3.fromRGB(0, 90, 150)
+            }):Play()
+            
+            -- إعادة ألوان الأزرار الأخرى
+            for tabName, tabBtn in pairs(tabButtons) do
+                if tabName ~= name then
+                    game:GetService("TweenService"):Create(tabBtn, TweenInfo.new(0.1), {
+                        BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+                    }):Play()
+                end
+            end
+            
             currentTab = name
-            -- تحديث الواجهة حسب التبويب المحدد
+            -- مسح المحتوى الحالي
+            for _, child in ipairs(contentFrame:GetChildren()) do
+                child:Destroy()
+            end
+            -- إنشاء المحتوى الجديد
+            Tabs[name].Create(contentFrame)
         end
     end)
     
@@ -237,7 +254,7 @@ local function LoadScriptFromGitHub(scriptPath)
     end
 end
 
--- نظام الإشعارات المحسن
+-- نظام الإشعارات
 local function ShowNotification(title, text, notificationType)
     local icon = "rbxassetid://7733658504" -- أيقونة افتراضية
     if notificationType == "error" then
@@ -255,12 +272,20 @@ local function ShowNotification(title, text, notificationType)
 end
 
 -- إخفاء/إظهار الواجهة
-closeButton.MouseButton1Click:Connect(function()
-    game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.2), {
-        Size = UDim2.new(0, 0, 0, 0)
-    }):Play()
-    wait(0.2)
-    screenGui:Destroy()
+local isVisible = true
+toggleButton.MouseButton1Click:Connect(function()
+    if isVisible then
+        game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 0, 0, 0)
+        }):Play()
+        toggleButton.Text = "☰"
+    else
+        game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.2), {
+            Size = UDim2.new(0, 500, 0, 350)
+        }):Play()
+        toggleButton.Text = "×"
+    end
+    isVisible = not isVisible
 end)
 
 -- التحقق من التحديثات
@@ -268,10 +293,10 @@ local function CheckForUpdates()
     local versionFile = LoadScriptFromGitHub("version.txt")
     if versionFile and versionFile ~= Settings.Version then
         ShowNotification("تحديث متاح", "الإصدار "..versionFile.." متاح الآن!", "info")
-        -- يمكن إضافة منطق التحديث التلقائي هنا
     end
 end
 
 -- تهيئة الواجهة
 Tabs.Home.Create(contentFrame)
 CheckForUpdates()
+ShowNotification(Settings.HubName, "تم تحميل الواجهة بنجاح!", "success")
