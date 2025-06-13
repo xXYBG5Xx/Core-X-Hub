@@ -1,4 +1,5 @@
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
@@ -12,7 +13,14 @@ local borderColors = {
 }
 local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
--- شاشة الواجهة
+-- الصوت
+local clickSound = Instance.new("Sound")
+clickSound.SoundId = "rbxassetid://12222216" -- صوت بسيط (تقدر تغيّره)
+clickSound.Volume = 0.5
+clickSound.Name = "ClickSound"
+clickSound.Parent = playerGui
+
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CoreXHub"
 screenGui.ResetOnSpawn = false
@@ -46,17 +54,80 @@ sideMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 sideMenu.BorderSizePixel = 0
 sideMenu.Parent = mainFrame
 
-local function createSideButton(text, yPosition)
+-- محتوى الصفحات
+local contentFrame = Instance.new("Frame")
+contentFrame.Size = UDim2.new(1, -140, 1, -40)
+contentFrame.Position = UDim2.new(0, 140, 0, 35)
+contentFrame.BackgroundTransparency = 1
+contentFrame.Parent = mainFrame
+
+-- محتويات كل صفحة
+local pages = {}
+
+pages["Home"] = [[
+Welcome to Core X Hub: The Mercy Script 🌟
+مرحباً بك في كور إكس هب: سكربت ميرسي
+
+⚙️ Features | المميزات:
+- Powerful tools | أدوات قوية
+- Easy to use | سهل الاستخدام
+- Custom sections | أقسام مخصصة
+
+👑 Developed by: Core X Team
+]]
+
+pages["Settings"] = [[
+⚙️ Settings | الإعدادات
+
+- Coming soon... | قريباً
+]]
+
+pages["About"] = [[
+📄 About | حول
+
+- Core X Hub is a free Lua script interface.
+- Created for Roblox lovers 💙
+
+كور إكس هب هو سكربت مجاني لمحبي روبلوكس.
+]]
+
+-- نص الصفحة المعروضة
+local contentLabel = Instance.new("TextLabel")
+contentLabel.Size = UDim2.new(1, 0, 1, 0)
+contentLabel.BackgroundTransparency = 1
+contentLabel.TextWrapped = true
+contentLabel.TextYAlignment = Enum.TextYAlignment.Top
+contentLabel.TextXAlignment = Enum.TextXAlignment.Left
+contentLabel.Font = Enum.Font.SourceSans
+contentLabel.TextSize = 18
+contentLabel.TextColor3 = Color3.new(1, 1, 1)
+contentLabel.Text = pages["Home"]
+contentLabel.Parent = contentFrame
+
+-- زرار القائمة
+local function createSideButton(name, yPosition)
 	local btn = Instance.new("TextButton")
 	btn.Size = UDim2.new(1, -20, 0, 35)
 	btn.Position = UDim2.new(0, 10, 0, yPosition)
 	btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 	btn.BorderSizePixel = 0
-	btn.Text = text
+	btn.Text = name
 	btn.Font = Enum.Font.SourceSans
 	btn.TextColor3 = Color3.new(1, 1, 1)
 	btn.TextSize = 18
 	btn.Parent = sideMenu
+
+	local function animatePage()
+		clickSound:Play()
+		local tweenOut = TweenService:Create(contentLabel, TweenInfo.new(0.25), {TextTransparency = 1})
+		tweenOut:Play()
+		tweenOut.Completed:Wait()
+		contentLabel.Text = pages[name:match("^([^|]+)"):gsub("%s+", "")] or "No content"
+		local tweenIn = TweenService:Create(contentLabel, TweenInfo.new(0.25), {TextTransparency = 0})
+		tweenIn:Play()
+	end
+
+	btn.MouseButton1Click:Connect(animatePage)
 
 	btn.MouseEnter:Connect(function()
 		btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
@@ -70,31 +141,7 @@ createSideButton("Home | الرئيسية", 10)
 createSideButton("Settings | الإعدادات", 55)
 createSideButton("About | حول", 100)
 
--- محتوى الترحيب
-local welcomeText = Instance.new("TextLabel")
-welcomeText.Size = UDim2.new(1, -140, 1, -40)
-welcomeText.Position = UDim2.new(0, 140, 0, 35)
-welcomeText.BackgroundTransparency = 1
-welcomeText.TextWrapped = true
-welcomeText.TextYAlignment = Enum.TextYAlignment.Top
-welcomeText.TextXAlignment = Enum.TextXAlignment.Left
-welcomeText.Font = Enum.Font.SourceSans
-welcomeText.TextSize = 18
-welcomeText.TextColor3 = Color3.new(1, 1, 1)
-welcomeText.Text = [[
-Welcome to Core X Hub: The Mercy Script 🌟
-مرحباً بك في كور إكس هب: سكربت ميرسي
-
-⚙️ Features | المميزات:
-- Powerful tools | أدوات قوية
-- Easy to use | سهل الاستخدام
-- Custom sections | أقسام مخصصة
-
-👑 Developed by: Core X Team
-]]
-welcomeText.Parent = mainFrame
-
--- زر فتح/إغلاق دائري في يسار منتصف الشاشة
+-- زر إخفاء/إظهار
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 40, 0, 40)
 toggleButton.Position = UDim2.new(0, 10, 0.5, -20)
@@ -113,6 +160,7 @@ corner.Parent = toggleButton
 
 local guiVisible = true
 toggleButton.MouseButton1Click:Connect(function()
+	clickSound:Play()
 	guiVisible = not guiVisible
 	mainFrame.Visible = guiVisible
 	toggleButton.Text = guiVisible and "×" or "☰"
