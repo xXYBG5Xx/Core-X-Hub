@@ -24,44 +24,39 @@ local Colors = {
     TabNormal = Color3.fromRGB(40, 40, 40)
 }
 
--- إنشاء الواجهة الرئيسية
+-- إنشاء الواجهة
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = Settings.HubName
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- الإطار الرئيسي
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = Settings.HubSize
 mainFrame.Position = Settings.HubPosition
 mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Colors.Main
 mainFrame.BorderSizePixel = 0
-mainFrame.Visible = true -- تبدأ مفتوحة
+mainFrame.Visible = true
 mainFrame.Parent = screenGui
 
--- حواف مدورة للإطار
 local mainCorner = Instance.new("UICorner")
 mainCorner.CornerRadius = UDim.new(0, 15)
 mainCorner.Parent = mainFrame
 
--- زر التبديل
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 40, 0, 40)
 toggleButton.Position = Settings.ButtonPosition
 toggleButton.BackgroundColor3 = Colors.Button
-toggleButton.Text = "×" -- تبدأ بإشارة الإغلاق
+toggleButton.Text = "×"
 toggleButton.Font = Enum.Font.GothamBold
 toggleButton.TextColor3 = Colors.Text
 toggleButton.TextSize = 20
 toggleButton.Parent = screenGui
 
--- جعل الزر مدوراً
 local buttonCorner = Instance.new("UICorner")
 buttonCorner.CornerRadius = UDim.new(1, 0)
 buttonCorner.Parent = toggleButton
 
--- شريط العنوان
 local titleBar = Instance.new("Frame")
 titleBar.Size = UDim2.new(1, 0, 0, 30)
 titleBar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -78,7 +73,6 @@ title.TextSize = 16
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- القائمة الجانبية
 local sideMenu = Instance.new("Frame")
 sideMenu.Size = UDim2.new(0, 120, 1, -30)
 sideMenu.Position = UDim2.new(0, 0, 0, 30)
@@ -86,14 +80,12 @@ sideMenu.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 sideMenu.BorderSizePixel = 0
 sideMenu.Parent = mainFrame
 
--- محتوى الصفحات
 local contentFrame = Instance.new("Frame")
 contentFrame.Size = UDim2.new(1, -130, 1, -40)
 contentFrame.Position = UDim2.new(0, 130, 0, 35)
 contentFrame.BackgroundTransparency = 1
 contentFrame.Parent = mainFrame
 
--- الصفحات والأقسام
 local pages = {
     Home = {
         Title = "الرئيسية",
@@ -112,7 +104,6 @@ local pages = {
 local currentTab = "Home"
 local tabButtons = {}
 
--- إنشاء أزرار التبويبات
 local function createTabButtons()
     local yPos = 10
     for name, page in pairs(pages) do
@@ -133,7 +124,7 @@ local function createTabButtons()
         
         btn.MouseEnter:Connect(function()
             if name ~= currentTab then
-                game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+                TweenService:Create(btn, TweenInfo.new(0.1), {
                     BackgroundColor3 = Color3.fromRGB(60, 60, 60)
                 }):Play()
             end
@@ -141,7 +132,7 @@ local function createTabButtons()
         
         btn.MouseLeave:Connect(function()
             if name ~= currentTab then
-                game:GetService("TweenService"):Create(btn, TweenInfo.new(0.1), {
+                TweenService:Create(btn, TweenInfo.new(0.1), {
                     BackgroundColor3 = Colors.TabNormal
                 }):Play()
             end
@@ -150,11 +141,9 @@ local function createTabButtons()
         btn.MouseButton1Click:Connect(function()
             if name ~= currentTab then
                 currentTab = name
-                -- تحديث ألوان الأزرار
                 for tabName, tabBtn in pairs(tabButtons) do
                     tabBtn.BackgroundColor3 = tabName == name and Colors.TabSelected or Colors.TabNormal
                 end
-                -- تحديث المحتوى
                 updateContent()
             end
         end)
@@ -164,7 +153,6 @@ local function createTabButtons()
     end
 end
 
--- تحديث محتوى الصفحة
 local function updateContent()
     for _, child in ipairs(contentFrame:GetChildren()) do
         child:Destroy()
@@ -183,50 +171,48 @@ local function updateContent()
     contentLabel.Parent = contentFrame
 end
 
--- نظام إخفاء/إظهار الواجهة
 local function toggleUI()
     if mainFrame.Visible then
-        -- إخفاء الواجهة
-        game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {
+        local tween = TweenService:Create(mainFrame, TweenInfo.new(0.3), {
             Size = UDim2.new(0, 0, 0, 0),
             Position = Settings.HubPosition
-        }):Play()
+        })
+        tween:Play()
+        tween.Completed:Connect(function()
+            mainFrame.Visible = false
+        end)
         toggleButton.Text = "☰"
     else
-        -- إظهار الواجهة
         mainFrame.Visible = true
-        game:GetService("TweenService"):Create(mainFrame, TweenInfo.new(0.3), {
+        mainFrame.Size = UDim2.new(0, 0, 0, 0) -- إعداد الحجم صفر قبل التوسع
+        local tween = TweenService:Create(mainFrame, TweenInfo.new(0.3), {
             Size = Settings.HubSize,
             Position = Settings.HubPosition
-        }):Play()
+        })
+        tween:Play()
         toggleButton.Text = "×"
     end
-    mainFrame.Visible = not mainFrame.Visible
 end
 
--- تفعيل الزر
 toggleButton.MouseButton1Click:Connect(toggleUI)
 
--- تأثيرات الزر
 toggleButton.MouseEnter:Connect(function()
-    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.2), {
+    TweenService:Create(toggleButton, TweenInfo.new(0.2), {
         BackgroundColor3 = Colors.ButtonHover,
         Size = UDim2.new(0, 44, 0, 44)
     }):Play()
 end)
 
 toggleButton.MouseLeave:Connect(function()
-    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.2), {
+    TweenService:Create(toggleButton, TweenInfo.new(0.2), {
         BackgroundColor3 = Colors.Button,
         Size = UDim2.new(0, 40, 0, 40)
     }):Play()
 end)
 
--- تهيئة الواجهة
 createTabButtons()
 updateContent()
 
--- إشعار التحميل
 StarterGui:SetCore("SendNotification", {
     Title = Settings.HubName,
     Text = "تم تحميل الواجهة بنجاح!",
