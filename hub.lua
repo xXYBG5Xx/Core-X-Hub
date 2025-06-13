@@ -8,7 +8,7 @@ local playerGui = player:WaitForChild("PlayerGui")
 -- إعدادات السكربت الأساسية
 local Settings = {
     HubName = "Core X Hub",
-    Version = "2.1",
+    Version = "2.2",
     GitHubRepo = "YOUR_GITHUB_USERNAME/CoreXHub",
     DebugMode = false
 }
@@ -64,16 +64,50 @@ title.TextSize = 14
 title.TextXAlignment = Enum.TextXAlignment.Left
 title.Parent = titleBar
 
--- زر التبديل (إظهار/إخفاء)
+-- زر التبديل المنفصل المدور (الجديد)
 local toggleButton = Instance.new("TextButton")
 toggleButton.Size = UDim2.new(0, 30, 0, 30)
-toggleButton.Position = UDim2.new(1, -30, 0, 0)
-toggleButton.BackgroundTransparency = 1
+toggleButton.Position = UDim2.new(1, 40, 0, -15) -- وضع منفصل خارج الإطار
+toggleButton.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 toggleButton.Text = "×"
 toggleButton.Font = Enum.Font.GothamBold
 toggleButton.TextColor3 = Color3.new(1, 1, 1)
-toggleButton.TextSize = 20
-toggleButton.Parent = titleBar
+toggleButton.TextSize = 18
+toggleButton.Parent = screenGui
+
+-- جعل الزر مدور بالكامل
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0) -- دائري كامل
+buttonCorner.Parent = toggleButton
+
+-- تأثيرات الزر عند التفاعل
+toggleButton.MouseEnter:Connect(function()
+    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+        TextColor3 = Color3.fromRGB(255, 255, 255)
+    }):Play()
+end)
+
+toggleButton.MouseLeave:Connect(function()
+    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(45, 45, 45),
+        TextColor3 = Color3.fromRGB(255, 255, 255)
+    }):Play()
+end)
+
+toggleButton.MouseButton1Down:Connect(function()
+    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(80, 80, 80),
+        Size = UDim2.new(0, 28, 0, 28)
+    }):Play()
+end)
+
+toggleButton.MouseButton1Up:Connect(function()
+    game:GetService("TweenService"):Create(toggleButton, TweenInfo.new(0.1), {
+        BackgroundColor3 = Color3.fromRGB(60, 60, 60),
+        Size = UDim2.new(0, 30, 0, 30)
+    }):Play()
+end)
 
 -- القائمة الجانبية
 local sideMenu = Instance.new("Frame")
@@ -141,8 +175,6 @@ local Tabs = {
             loadingText.TextColor3 = Color3.new(1, 1, 1)
             loadingText.TextSize = 16
             loadingText.Parent = container
-            
-            -- سيتم ملء هذه القائمة من GitHub لاحقًا
         end
     },
     Settings = {
@@ -162,8 +194,6 @@ local Tabs = {
             title.TextSize = 18
             title.TextXAlignment = Enum.TextXAlignment.Left
             title.Parent = container
-            
-            -- إضافة عناصر الإعدادات هنا
         end
     }
 }
