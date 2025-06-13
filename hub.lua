@@ -1,30 +1,34 @@
--- واجهة Core X Hub مع صورة اللاعب وخلفية عشوائية
+-- Core X Hub مع زر إخفاء وإطار ملون عشوائي
 local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ألوان عشوائية للخلفية
-local colors = {
-    Color3.fromRGB(20, 20, 20),
-    Color3.fromRGB(30, 30, 60),
-    Color3.fromRGB(60, 30, 30),
-    Color3.fromRGB(25, 25, 50),
-    Color3.fromRGB(10, 40, 30),
-    Color3.fromRGB(40, 10, 40)
+-- ألوان عشوائية للإطار (الحواف)
+local borderColors = {
+	Color3.fromRGB(170, 0, 255),
+	Color3.fromRGB(0, 170, 255),
+	Color3.fromRGB(0, 255, 170),
+	Color3.fromRGB(255, 85, 0),
+	Color3.fromRGB(255, 0, 127),
+	Color3.fromRGB(0, 255, 255)
 }
-local randomColor = colors[math.random(1, #colors)]
+local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
--- واجهة
+-- GUI
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CoreXHub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
+-- خلفية ثابتة
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 450, 0, 280)
 mainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
-mainFrame.BackgroundColor3 = randomColor
-mainFrame.BorderSizePixel = 0
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BorderSizePixel = 4
+mainFrame.BorderColor3 = randomBorderColor
 mainFrame.Parent = screenGui
 
 -- عنوان
@@ -46,26 +50,26 @@ sidebar.BorderSizePixel = 0
 sidebar.Parent = mainFrame
 
 local categories = {
-    "Home | القائمة الرئيسية",
-    "Game | التخريب",
-    "Character | اللاعب",
-    "Target | استهداف",
-    "Anims | انميشنات",
-    "Misc | أخرى",
-    "Credits | الحقوق"
+	"Home | القائمة الرئيسية",
+	"Game | التخريب",
+	"Character | اللاعب",
+	"Target | استهداف",
+	"Anims | انميشنات",
+	"Misc | أخرى",
+	"Credits | الحقوق"
 }
 
 for i, text in ipairs(categories) do
-    local button = Instance.new("TextButton")
-    button.Size = UDim2.new(1, 0, 0, 25)
-    button.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-    button.Text = text
-    button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-    button.TextColor3 = Color3.new(1, 1, 1)
-    button.BorderSizePixel = 0
-    button.Font = Enum.Font.SourceSans
-    button.TextSize = 16
-    button.Parent = sidebar
+	local button = Instance.new("TextButton")
+	button.Size = UDim2.new(1, 0, 0, 25)
+	button.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
+	button.Text = text
+	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	button.TextColor3 = Color3.new(1, 1, 1)
+	button.BorderSizePixel = 0
+	button.Font = Enum.Font.SourceSans
+	button.TextSize = 16
+	button.Parent = sidebar
 end
 
 -- صورة اللاعب
@@ -108,3 +112,13 @@ Free User : حالة الاشتراك
 نتمنى ان يعجبك السكربت.
 ]]
 homeText.Parent = mainFrame
+
+-- زر إظهار/إخفاء
+local visible = true
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+	if gameProcessed then return end
+	if input.KeyCode == Enum.KeyCode.B then
+		visible = not visible
+		mainFrame.Visible = visible
+	end
+end)
