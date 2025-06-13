@@ -58,17 +58,71 @@ MainFrame.Visible = true
 Instance.new("UICorner", MainFrame).CornerRadius = UDim.new(0, 12)
 MainFrame.ClipsDescendants = true
 
+-- تمكين السحب على MainFrame
+local dragging
+local dragInput
+local dragStart
+local startPos
+
+local function update(input)
+    local delta = input.Position - dragStart
+    MainFrame.Position = UDim2.new(
+        startPos.X.Scale,
+        startPos.X.Offset + delta.X,
+        startPos.Y.Scale,
+        startPos.Y.Offset + delta.Y
+    )
+end
+
+MainFrame.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = MainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+MainFrame.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement then
+        dragInput = input
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        update(input)
+    end
+end)
+
 -- Animation عند الفتح
 MainFrame.Size = UDim2.new(0, 0, 0, 0)
 TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Sine), {
     Size = UDim2.new(0, 650, 0, 330)
 }):Play()
 
--- قائمة التبويبات الجانبية
+-- قائمة التبويبات الجانبية (تصغير وعرض 120 بكسل، ووضعها في منتصف MainFrame عمودياً)
 local SideBar = Instance.new("Frame", MainFrame)
-SideBar.Size = UDim2.new(0, 150, 1, 0)
+SideBar.Size = UDim2.new(0, 120, 0, 330) -- ارتفاع نفس MainFrame
+SideBar.Position = UDim2.new(0, 265, 0, 0) -- مركز داخل MainFrame (650-120)/2 = 265
 SideBar.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 Instance.new("UICorner", SideBar).CornerRadius = UDim.new(0, 8)
+
+-- عنوان رئيسي فوق القائمة
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(0, 650, 0, 40)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 28
+Title.TextColor3 = Color3.fromRGB(70, 130, 180)
+Title.Text = "Core X Hub"
+Title.TextXAlignment = Enum.TextXAlignment.Center
+Title.ZIndex = 15
 
 -- تبويبات
 local tabs = {
@@ -89,24 +143,39 @@ for i, text in ipairs(tabs) do
 	tab.Position = UDim2.new(0, 10, 0, (i - 1) * 40 + 10)
 	tab.Text = text
 	tab.Font = Enum.Font.GothamSemibold
-	tab.TextColor3 = Color3.fromRGB(180, 180, 180) -- لون نص افتراضي رمادي فاتح
+	tab.TextColor3 = Color3.fromRGB(180, 180, 180)
 	tab.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 	tab.TextSize = 14
 	tab.AutoButtonColor = false
 	Instance.new("UICorner", tab).CornerRadius = UDim.new(0, 6)
 
+	-- تأثير عند مرور الماوس على التبويب
+	tab.MouseEnter:Connect(function()
+		if tab.BackgroundColor3 ~= Color3.fromRGB(70, 130, 180) then -- لو مش محدد
+			TweenService:Create(tab, TweenInfo.new(0.15), {BackgroundTransparency = 0.4}):Play()
+		end
+	end)
+
+	tab.MouseLeave:Connect(function()
+		if tab.BackgroundColor3 ~= Color3.fromRGB(70, 130, 180) then
+			TweenService:Create(tab, TweenInfo.new(0.15), {BackgroundTransparency = 0}):Play()
+		end
+	end)
+
 	tab.MouseButton1Click:Connect(function()
 		clickSound:Play()
 
-		-- إعادة اللون الأساسي لكل الأزرار
+		-- إعادة اللون لكل الأزرار
 		for _, other in pairs(buttons) do
 			other.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
 			other.TextColor3 = Color3.fromRGB(180, 180, 180)
+			other.BackgroundTransparency = 0
 		end
 
 		-- تمييز الزر المحدد
 		tab.BackgroundColor3 = Color3.fromRGB(70, 130, 180)
 		tab.TextColor3 = Color3.fromRGB(255, 255, 255)
+		tab.BackgroundTransparency = 0
 	end)
 
 	buttons[i] = tab
@@ -118,8 +187,8 @@ buttons[1].TextColor3 = Color3.fromRGB(255, 255, 255)
 
 -- الصفحة الرئيسية
 local HomeFrame = Instance.new("Frame", MainFrame)
-HomeFrame.Position = UDim2.new(0, 160, 0, 0)
-HomeFrame.Size = UDim2.new(1, -160, 1, 0)
+HomeFrame.Position = UDim2.new(0, 0, 0, 40)
+HomeFrame.Size = UDim2.new(1, 0, 1, -40)
 HomeFrame.BackgroundTransparency = 1
 
 -- صورة اللاعب
