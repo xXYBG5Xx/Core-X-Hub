@@ -1,34 +1,31 @@
--- Core X Hub مع زر إخفاء وإطار ملون عشوائي
 local Players = game:GetService("Players")
-local UserInputService = game:GetService("UserInputService")
-
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- ألوان عشوائية للإطار (الحواف)
+-- ألوان الحواف
 local borderColors = {
-	Color3.fromRGB(170, 0, 255),
-	Color3.fromRGB(0, 170, 255),
-	Color3.fromRGB(0, 255, 170),
-	Color3.fromRGB(255, 85, 0),
-	Color3.fromRGB(255, 0, 127),
-	Color3.fromRGB(0, 255, 255)
+    Color3.fromRGB(255, 0, 0),   -- أحمر
+    Color3.fromRGB(0, 255, 0),   -- أخضر
+    Color3.fromRGB(0, 0, 255),   -- أزرق
+    Color3.fromRGB(255, 255, 0), -- أصفر
+    Color3.fromRGB(0, 255, 255)  -- سماوي
 }
 local randomBorderColor = borderColors[math.random(1, #borderColors)]
 
--- GUI
+-- إنشاء ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "CoreXHub"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- خلفية ثابتة
+-- الإطار الرئيسي
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 450, 0, 280)
 mainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 4
 mainFrame.BorderColor3 = randomBorderColor
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Parent = screenGui
 
 -- عنوان
@@ -41,84 +38,58 @@ title.TextColor3 = Color3.new(1, 1, 1)
 title.TextSize = 22
 title.Parent = mainFrame
 
--- قائمة جانبية
-local sidebar = Instance.new("Frame")
-sidebar.Size = UDim2.new(0, 130, 1, -30)
-sidebar.Position = UDim2.new(0, 0, 0, 30)
-sidebar.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-sidebar.BorderSizePixel = 0
-sidebar.Parent = mainFrame
+-- قائمة جانبية احترافية
+local sideMenu = Instance.new("Frame")
+sideMenu.Size = UDim2.new(0, 130, 1, -30)
+sideMenu.Position = UDim2.new(0, 0, 0, 30)
+sideMenu.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+sideMenu.BorderSizePixel = 0
+sideMenu.Parent = mainFrame
 
-local categories = {
-	"Home | القائمة الرئيسية",
-	"Game | التخريب",
-	"Character | اللاعب",
-	"Target | استهداف",
-	"Anims | انميشنات",
-	"Misc | أخرى",
-	"Credits | الحقوق"
-}
+local function createSideButton(text, yPosition)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 35)
+    btn.Position = UDim2.new(0, 10, 0, yPosition)
+    btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    btn.BorderSizePixel = 0
+    btn.Text = text
+    btn.Font = Enum.Font.SourceSans
+    btn.TextColor3 = Color3.new(1, 1, 1)
+    btn.TextSize = 18
+    btn.Parent = sideMenu
 
-for i, text in ipairs(categories) do
-	local button = Instance.new("TextButton")
-	button.Size = UDim2.new(1, 0, 0, 25)
-	button.Position = UDim2.new(0, 0, 0, (i - 1) * 26)
-	button.Text = text
-	button.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-	button.TextColor3 = Color3.new(1, 1, 1)
-	button.BorderSizePixel = 0
-	button.Font = Enum.Font.SourceSans
-	button.TextSize = 16
-	button.Parent = sidebar
+    btn.MouseEnter:Connect(function()
+        btn.BackgroundColor3 = Color3.fromRGB(70, 70, 70)
+    end)
+    btn.MouseLeave:Connect(function()
+        btn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+    end)
 end
 
--- صورة اللاعب
-local thumbType = Enum.ThumbnailType.HeadShot
-local thumbSize = Enum.ThumbnailSize.Size150x150
-local content, isReady = Players:GetUserThumbnailAsync(player.UserId, thumbType, thumbSize)
+createSideButton("الرئيسية", 10)
+createSideButton("الإعدادات", 55)
+createSideButton("حول", 100)
 
-local playerImage = Instance.new("ImageLabel")
-playerImage.Size = UDim2.new(0, 100, 0, 100)
-playerImage.Position = UDim2.new(0, 140, 0, 40)
-playerImage.BackgroundTransparency = 0.2
-playerImage.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-playerImage.Image = content
-playerImage.Parent = mainFrame
+-- زر إغلاق وفتح الواجهة في الركن الأسفل الأيسر
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 35, 0, 35)
+toggleButton.Position = UDim2.new(0, 10, 1, -45) -- 10 بكسل من اليسار، و 45 بكسل من الأسفل
+toggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+toggleButton.BorderSizePixel = 0
+toggleButton.Text = "×"
+toggleButton.Font = Enum.Font.SourceSansBold
+toggleButton.TextColor3 = Color3.fromRGB(255, 80, 80)
+toggleButton.TextSize = 28
+toggleButton.AnchorPoint = Vector2.new(0, 0)
+toggleButton.Parent = screenGui -- مهم: الزر خارج الإطار الرئيسي ليظل ظاهر دائمًا
 
--- نص ترحيبي
-local homeText = Instance.new("TextLabel")
-homeText.Position = UDim2.new(0, 250, 0, 40)
-homeText.Size = UDim2.new(0, 180, 0, 200)
-homeText.BackgroundTransparency = 1
-homeText.TextColor3 = Color3.new(1, 1, 1)
-homeText.Font = Enum.Font.SourceSans
-homeText.TextSize = 18
-homeText.TextXAlignment = Enum.TextXAlignment.Left
-homeText.TextYAlignment = Enum.TextYAlignment.Top
-homeText.TextWrapped = true
-homeText.Text = [[
-@]] .. player.Name .. [[
-
-صباح النور
-
-اضغط [B] لإخفاء الواجهة
-Free User : حالة الاشتراك
-
-للاشتراك تفضل دسكورد Core X
-
-جميع الحقوق محفوظة لسيرفر Core X
-المطورين غير مسؤولين عن سوء الاستخدام
-
-نتمنى ان يعجبك السكربت.
-]]
-homeText.Parent = mainFrame
-
--- زر إظهار/إخفاء
-local visible = true
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-	if gameProcessed then return end
-	if input.KeyCode == Enum.KeyCode.B then
-		visible = not visible
-		mainFrame.Visible = visible
-	end
+local guiVisible = true
+toggleButton.MouseButton1Click:Connect(function()
+    guiVisible = not guiVisible
+    mainFrame.Visible = guiVisible
+    if guiVisible then
+        toggleButton.Text = "×"
+    else
+        toggleButton.Text = "☰"
+    end
 end)
