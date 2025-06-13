@@ -21,11 +21,11 @@ screenGui.Parent = playerGui
 -- الإطار الرئيسي
 local mainFrame = Instance.new("Frame")
 mainFrame.Size = UDim2.new(0, 450, 0, 280)
-mainFrame.Position = UDim2.new(0.5, -225, 0.5, -140)
+mainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
+mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 mainFrame.BorderSizePixel = 4
 mainFrame.BorderColor3 = randomBorderColor
-mainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
 mainFrame.Parent = screenGui
 
 -- عنوان
@@ -70,18 +70,24 @@ createSideButton("الرئيسية", 10)
 createSideButton("الإعدادات", 55)
 createSideButton("حول", 100)
 
--- زر إغلاق وفتح الواجهة في الركن الأسفل الأيسر
+-- زر إغلاق وفتح الواجهة (دائري) فوق في منتصف اليسار
 local toggleButton = Instance.new("TextButton")
-toggleButton.Size = UDim2.new(0, 35, 0, 35)
-toggleButton.Position = UDim2.new(0, 10, 1, -45) -- 10 بكسل من اليسار، و 45 بكسل من الأسفل
+toggleButton.Size = UDim2.new(0, 40, 0, 40)
+toggleButton.Position = UDim2.new(0, 10, 0.5, -20) -- 10 بكسل من اليسار، ووسط الشاشة -20 لرفع للنص وسط الزر
 toggleButton.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
 toggleButton.BorderSizePixel = 0
 toggleButton.Text = "×"
 toggleButton.Font = Enum.Font.SourceSansBold
 toggleButton.TextColor3 = Color3.fromRGB(255, 80, 80)
-toggleButton.TextSize = 28
+toggleButton.TextSize = 30
 toggleButton.AnchorPoint = Vector2.new(0, 0)
-toggleButton.Parent = screenGui -- مهم: الزر خارج الإطار الرئيسي ليظل ظاهر دائمًا
+
+-- إضافة UICorner عشان يكون دائري
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(1, 0) -- دائري 100%
+corner.Parent = toggleButton
+
+toggleButton.Parent = screenGui
 
 local guiVisible = true
 toggleButton.MouseButton1Click:Connect(function()
