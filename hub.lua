@@ -1,4 +1,4 @@
--- Core X Hub - واجهة احترافية
+-- Core X Hub - واجهة احترافية مدمجة بكل الأقسام
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local StarterGui = game:GetService("StarterGui")
@@ -15,17 +15,15 @@ local borderColors = {
 }
 local borderColor = borderColors[math.random(1, #borderColors)]
 
--- إزالة النسخة القديمة
 if playerGui:FindFirstChild("CoreXHub") then
 	playerGui.CoreXHub:Destroy()
 end
 
--- الواجهة الرئيسية
 local screenGui = Instance.new("ScreenGui", playerGui)
 screenGui.Name = "CoreXHub"
 screenGui.ResetOnSpawn = false
 
--- زر البرغر - في المنتصف يسار
+-- زر البرغر
 local burger = Instance.new("TextButton", screenGui)
 burger.Size = UDim2.new(0, 40, 0, 40)
 burger.Position = UDim2.new(0, 10, 0.5, -20)
@@ -35,11 +33,10 @@ burger.Font = Enum.Font.GothamBlack
 burger.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 burger.TextColor3 = Color3.new(1, 1, 1)
 burger.ZIndex = 3
-
 local burgerCorner = Instance.new("UICorner", burger)
 burgerCorner.CornerRadius = UDim.new(0, 8)
 
--- الإطار الرئيسي في منتصف الشاشة
+-- الإطار الرئيسي
 local main = Instance.new("Frame", screenGui)
 main.Size = UDim2.new(0, 550, 0, 330)
 main.Position = UDim2.new(0.5, -275, 0.5, -165)
@@ -50,37 +47,31 @@ main.Visible = true
 main.Active = true
 main.Draggable = true
 main.ZIndex = 2
-
 local corner = Instance.new("UICorner", main)
 corner.CornerRadius = UDim.new(0, 12)
 
--- قائمة التبويبات
 local tabFrame = Instance.new("Frame", main)
 tabFrame.Size = UDim2.new(0, 120, 1, 0)
 tabFrame.Position = UDim2.new(0, 0, 0, 0)
 tabFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-
 local tabLayout = Instance.new("UIListLayout", tabFrame)
 tabLayout.FillDirection = Enum.FillDirection.Vertical
 tabLayout.SortOrder = Enum.SortOrder.LayoutOrder
 tabLayout.Padding = UDim.new(0, 4)
 
--- المحتوى
 local content = Instance.new("Frame", main)
 content.Name = "Content"
 content.Size = UDim2.new(1, -120, 1, 0)
 content.Position = UDim2.new(0, 120, 0, 0)
 content.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-
 local contentCorner = Instance.new("UICorner", content)
 contentCorner.CornerRadius = UDim.new(0, 8)
 
--- صوت الضغط
+-- الأصوات
 local clickSound = Instance.new("Sound", screenGui)
 clickSound.SoundId = "rbxassetid://9118823102"
 clickSound.Volume = 1
 
--- صوت نجاح التحميل
 local successSound = Instance.new("Sound", screenGui)
 successSound.SoundId = "rbxassetid://9118825008"
 successSound.Volume = 1
@@ -96,11 +87,8 @@ local function showNotification(text, success)
 	notif.Font = Enum.Font.GothamBold
 	notif.TextSize = 16
 	notif.AnchorPoint = Vector2.new(0.5, 0)
-	notif.BackgroundTransparency = 0
-
 	local uiCorner = Instance.new("UICorner", notif)
 	uiCorner.CornerRadius = UDim.new(0, 8)
-
 	TweenService:Create(notif, TweenInfo.new(0.3), {BackgroundTransparency = 0.1}):Play()
 	wait(2)
 	TweenService:Create(notif, TweenInfo.new(0.5), {BackgroundTransparency = 1}):Play()
@@ -108,34 +96,45 @@ local function showNotification(text, success)
 	notif:Destroy()
 end
 
+-- المحتوى لكل قسم
+local Sections = {
+	Home = "مرحبا بك في Core X Hub\nلإخفاء الواجهة اضغط [B]",
+	Game = "أدوات التدمير والتحكم في اللعبة",
+	Character = "معلومات وتحكمات اللاعب",
+	Target = "استهداف لاعبين محددين",
+	Anims = "تشغيل الأنيميشنات",
+	Misc = "أدوات متنوعة",
+	Credits = "سكربت بواسطة Zeus\nجميع الحقوق محفوظة",
+	Setting = "إعدادات الواجهة وخيارات الصوت"
+}
+
 -- تحميل القسم
 local function loadSection(name)
 	content:ClearAllChildren()
 	clickSound:Play()
-	local suc, err = pcall(function()
-		loadfile("Sections/" .. name .. ".lua")()
-	end)
-
-	if suc then
-		showNotification("✅ تم تحميل " .. name, true)
-		successSound:Play()
-	else
-		warn(err)
-		showNotification("❌ فشل تحميل " .. name, false)
-	end
+	local label = Instance.new("TextLabel", content)
+	label.Size = UDim2.new(1, -10, 1, -10)
+	label.Position = UDim2.new(0, 5, 0, 5)
+	label.Text = Sections[name] or ("قسم " .. name .. " غير متوفر")
+	label.TextWrapped = true
+	label.TextColor3 = Color3.new(1, 1, 1)
+	label.Font = Enum.Font.GothamSemibold
+	label.TextSize = 16
+	label.BackgroundTransparency = 1
+	showNotification("✅ تم تحميل " .. name, true)
+	successSound:Play()
 end
 
--- إنشاء زر تبويب
-local function createTab(name, label)
+-- زر تبويب
+local function createTab(name)
 	local btn = Instance.new("TextButton", tabFrame)
 	btn.Size = UDim2.new(1, -8, 0, 32)
-	btn.Text = label .. " | " .. name
+	btn.Text = name
 	btn.TextColor3 = Color3.fromRGB(240, 240, 240)
 	btn.Font = Enum.Font.Gotham
 	btn.TextSize = 14
 	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 	btn.BorderSizePixel = 0
-
 	local bCorner = Instance.new("UICorner", btn)
 	bCorner.CornerRadius = UDim.new(0, 6)
 
@@ -150,27 +149,15 @@ local function createTab(name, label)
 	end)
 end
 
--- الأقسام
-local tabs = {
-	{"Home", "الرئيسية"},
-	{"Game", "التخريب"},
-	{"Character", "اللاعب"},
-	{"Target", "استهداف"},
-	{"Anims", "انميشنات"},
-	{"Misc", "أخرى"},
-	{"Credits", "الحقوق"}
-}
-
--- إنشاء التبويبات
-for _, v in ipairs(tabs) do
-	createTab(v[1], v[2])
+-- التبويبات
+for name in pairs(Sections) do
+	createTab(name)
 end
 
--- زر الإظهار والإخفاء
 burger.MouseButton1Click:Connect(function()
 	main.Visible = not main.Visible
 	clickSound:Play()
 end)
 
--- تحميل القسم الأول تلقائياً
+-- تحميل البداية
 loadSection("Home")
