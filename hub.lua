@@ -1,151 +1,191 @@
--- Core X Hub - إصدار واجهة فقط
--- بواسطة Zeus
+-- Core X Hub - واجهة احترافية
+-- By Zeus
 
-local Players = game:GetService("Players")
+-- الخدمات
 local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
 local StarterGui = game:GetService("StarterGui")
 local UserInputService = game:GetService("UserInputService")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- إزالة الواجهة القديمة لو كانت موجودة
-if playerGui:FindFirstChild("CoreXHub") then
-	playerGui:FindFirstChild("CoreXHub"):Destroy()
-end
-
--- ألوان الحواف العشوائية
-local borderColors = {
-	Color3.fromRGB(255, 85, 85),
-	Color3.fromRGB(85, 255, 127),
-	Color3.fromRGB(85, 170, 255),
-	Color3.fromRGB(255, 170, 0),
-	Color3.fromRGB(170, 85, 255),
-	Color3.fromRGB(0, 255, 255)
+-- الحواف العشوائية
+local colors = {
+	Color3.fromRGB(255, 99, 99),
+	Color3.fromRGB(99, 255, 99),
+	Color3.fromRGB(99, 99, 255),
+	Color3.fromRGB(255, 255, 99),
+	Color3.fromRGB(255, 99, 255),
+	Color3.fromRGB(99, 255, 255),
 }
-local randomColor = borderColors[math.random(1, #borderColors)]
+local edgeColor = colors[math.random(1, #colors)]
 
--- واجهة رئيسية
+-- إنشاء الشاشة
 local ScreenGui = Instance.new("ScreenGui", playerGui)
 ScreenGui.Name = "CoreXHub"
 ScreenGui.ResetOnSpawn = false
 
 -- زر البرغر
-local BurgerButton = Instance.new("TextButton")
-BurgerButton.Name = "BurgerButton"
-BurgerButton.Parent = ScreenGui
-BurgerButton.AnchorPoint = Vector2.new(0.5, 0.5)
-BurgerButton.Position = UDim2.new(0, 30, 0.5, 0)
-BurgerButton.Size = UDim2.new(0, 40, 0, 40)
-BurgerButton.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-BurgerButton.Text = "≡"
-BurgerButton.TextSize = 20
-BurgerButton.TextColor3 = Color3.new(1, 1, 1)
-BurgerButton.AutoButtonColor = true
-BurgerButton.BorderSizePixel = 0
-BurgerButton.ClipsDescendants = true
-BurgerButton.BackgroundTransparency = 0.1
-BurgerButton.ZIndex = 2
-BurgerButton.Font = Enum.Font.GothamBold
-BurgerButton.BorderMode = Enum.BorderMode.Outline
-BurgerButton.BorderColor3 = randomColor
-BurgerButton.UICorner = Instance.new("UICorner", BurgerButton)
-BurgerButton.UICorner.CornerRadius = UDim.new(1, 0)
+local Burger = Instance.new("TextButton", ScreenGui)
+Burger.Size = UDim2.new(0, 40, 0, 40)
+Burger.Position = UDim2.new(0, -50, 0.5, -20)
+Burger.AnchorPoint = Vector2.new(0, 0.5)
+Burger.BackgroundColor3 = edgeColor
+Burger.Text = "≡"
+Burger.TextColor3 = Color3.new(1,1,1)
+Burger.Font = Enum.Font.GothamBlack
+Burger.TextSize = 24
+Burger.BorderSizePixel = 0
+Burger.AutoButtonColor = false
+Burger.BackgroundTransparency = 0.1
+Burger.ZIndex = 10
+Burger.ClipsDescendants = true
+Burger.Name = "Burger"
 
--- نافذة الواجهة
-local MainFrame = Instance.new("Frame")
-MainFrame.Name = "MainFrame"
-MainFrame.Parent = ScreenGui
-MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
-MainFrame.Position = UDim2.new(0.5, 0, 0.5, 0)
-MainFrame.Size = UDim2.new(0, 520, 0, 340)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-MainFrame.BorderSizePixel = 0
-MainFrame.Visible = true
-MainFrame.Active = true
-MainFrame.Draggable = true
+-- تحريك الزر
+local dragging, dragInput, dragStart, startPos
+Burger.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = Burger.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+		local delta = input.Position - dragStart
+		Burger.Position = startPos + UDim2.new(0, delta.X, 0, delta.Y)
+	end
+end)
 
--- الحواف
-local UICorner = Instance.new("UICorner", MainFrame)
-UICorner.CornerRadius = UDim.new(0, 16)
-
--- إطار الحواف المتغيرة اللون
-local UIStroke = Instance.new("UIStroke", MainFrame)
-UIStroke.Color = randomColor
-UIStroke.Thickness = 2
-UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+-- الإطار الرئيسي
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 650, 0, 400)
+Main.Position = UDim2.new(0.5, 0, 0.5, 0)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Main.BorderColor3 = edgeColor
+Main.BorderSizePixel = 3
+Main.Visible = false
+Main.ClipsDescendants = true
+Main.Active = true
+Main.Draggable = true
+Main.Name = "Main"
+Main.BackgroundTransparency = 0.1
 
 -- العنوان
-local Title = Instance.new("TextLabel", MainFrame)
-Title.Name = "Title"
-Title.Text = "Core X Hub"
-Title.Font = Enum.Font.GothamBlack
-Title.TextSize = 22
-Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 40)
 Title.BackgroundTransparency = 1
-Title.Position = UDim2.new(0, 20, 0, 10)
-Title.Size = UDim2.new(1, -40, 0, 30)
-Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Text = "Core X hub : the best script for anymap"
+Title.Font = Enum.Font.GothamBold
+Title.TextColor3 = edgeColor
+Title.TextScaled = true
 
--- الأقسام الجانبية
-local Sidebar = Instance.new("Frame", MainFrame)
-Sidebar.Name = "Sidebar"
-Sidebar.Position = UDim2.new(0, 10, 0, 50)
-Sidebar.Size = UDim2.new(0, 130, 1, -60)
-Sidebar.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Sidebar.BorderSizePixel = 0
+-- القائمة الجانبية
+local Side = Instance.new("Frame", Main)
+Side.Size = UDim2.new(0, 150, 1, -40)
+Side.Position = UDim2.new(0, 0, 0, 40)
+Side.BackgroundColor3 = Color3.fromRGB(30,30,30)
+Side.BorderSizePixel = 0
 
-local sideCorner = Instance.new("UICorner", Sidebar)
-sideCorner.CornerRadius = UDim.new(0, 10)
+-- أقسام
+local Tabs = {"Home", "Settings", "Game", "Character", "Target", "Other", "Misc"}
+local Sections = {}
+local SelectedTab = nil
 
--- أسماء الأقسام
-local sections = {
-	"Home", "Setting", "Game", "Player", "Target", "Misc", "Credits"
-}
+for i, name in ipairs(Tabs) do
+	local Button = Instance.new("TextButton", Side)
+	Button.Size = UDim2.new(1, -10, 0, 40)
+	Button.Position = UDim2.new(0, 5, 0, (i - 1) * 45)
+	Button.Text = name
+	Button.Name = name
+	Button.Font = Enum.Font.GothamSemibold
+	Button.TextColor3 = Color3.new(1,1,1)
+	Button.TextSize = 18
+	Button.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+	Button.BorderSizePixel = 0
+	Button.AutoButtonColor = false
 
-for i, name in ipairs(sections) do
-	local btn = Instance.new("TextButton", Sidebar)
-	btn.Name = name .. "Btn"
-	btn.Text = name
-	btn.Size = UDim2.new(1, -10, 0, 32)
-	btn.Position = UDim2.new(0, 5, 0, (i - 1) * 36)
-	btn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
-	btn.Font = Enum.Font.Gotham
-	btn.TextSize = 14
-	btn.AutoButtonColor = true
-	btn.BorderSizePixel = 0
-
-	local corner = Instance.new("UICorner", btn)
-	corner.CornerRadius = UDim.new(0, 8)
-
-	btn.MouseEnter:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = randomColor}):Play()
+	Button.MouseEnter:Connect(function()
+		if SelectedTab ~= name then
+			TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(60,60,60)}):Play()
+		end
+	end)
+	Button.MouseLeave:Connect(function()
+		if SelectedTab ~= name then
+			TweenService:Create(Button, TweenInfo.new(0.25), {BackgroundColor3 = Color3.fromRGB(45,45,45)}):Play()
+		end
 	end)
 
-	btn.MouseLeave:Connect(function()
-		TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(35, 35, 35)}):Play()
+	local Section = Instance.new("ScrollingFrame", Main)
+	Section.Name = name.."Section"
+	Section.Size = UDim2.new(1, -160, 1, -50)
+	Section.Position = UDim2.new(0, 160, 0, 45)
+	Section.CanvasSize = UDim2.new(0,0,5,0)
+	Section.ScrollBarThickness = 5
+	Section.BackgroundColor3 = Color3.fromRGB(40,40,40)
+	Section.Visible = false
+	Sections[name] = Section
+
+	Button.MouseButton1Click:Connect(function()
+		if SelectedTab then
+			local last = Side:FindFirstChild(SelectedTab)
+			if last then
+				TweenService:Create(last, TweenInfo.new(0.3), {BackgroundColor3 = Color3.fromRGB(45,45,45)}):Play()
+				Sections[SelectedTab].Visible = false
+			end
+		end
+		SelectedTab = name
+		TweenService:Create(Button, TweenInfo.new(0.3), {BackgroundColor3 = edgeColor}):Play()
+		Section.Visible = true
 	end)
+
+	if i == 1 then
+		Button:MouseButton1Click()
+	end
 end
 
--- زر إظهار/إخفاء القائمة
-local isOpen = true
-BurgerButton.MouseButton1Click:Connect(function()
-	isOpen = not isOpen
-	MainFrame.Visible = isOpen
-end)
+-- أنيميشن فتح
+local function ToggleUI()
+	local visible = not Main.Visible
+	Main.Visible = true
+	local tween = TweenService:Create(Main, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {
+		Size = visible and UDim2.new(0, 650, 0, 400) or UDim2.new(0, 0, 0, 0),
+		Transparency = visible and 0.1 or 1
+	})
+	tween:Play()
+	wait(visible and 0.4 or 0.2)
+	Main.Visible = visible
+end
+Burger.MouseButton1Click:Connect(ToggleUI)
 
--- تأثير إشعار عند التشغيل
-StarterGui:SetCore("SendNotification", {
-	Title = "Core X Hub",
-	Text = "تم تشغيل الواجهة بنجاح",
-	Duration = 3
-})
-
--- صوت بسيط
-local sound = Instance.new("Sound", playerGui)
-sound.SoundId = "rbxassetid://9118823102" -- صوت نقر بسيط
-sound.Volume = 1
-
-BurgerButton.MouseButton1Click:Connect(function()
+-- إشعار نجاح
+local function ShowNotification(success)
+	local msg = Instance.new("TextLabel", ScreenGui)
+	msg.Size = UDim2.new(0, 300, 0, 50)
+	msg.Position = UDim2.new(0.5, -150, 0, -60)
+	msg.BackgroundColor3 = success and Color3.fromRGB(0,200,0) or Color3.fromRGB(200,0,0)
+	msg.Text = success and "✅ Loaded Core X Hub!" or "❌ Failed to load!"
+	msg.TextColor3 = Color3.new(1,1,1)
+	msg.Font = Enum.Font.GothamBold
+	msg.TextSize = 20
+	msg.BorderSizePixel = 0
+	msg.AnchorPoint = Vector2.new(0.5,0)
+	
+	local sound = Instance.new("Sound", msg)
+	sound.SoundId = success and "rbxassetid://6026984224" or "rbxassetid://6026984225"
+	sound.Volume = 2
 	sound:Play()
-end)
+
+	TweenService:Create(msg, TweenInfo.new(0.5), {Position = UDim2.new(0.5, -150, 0, 20)}):Play()
+	wait(2.5)
+	TweenService:Create(msg, TweenInfo.new(0.5), {Position = UDim2.new(0.5, -150, 0, -60)}):Play()
+	wait(0.6)
+	msg:Destroy()
+end
+
+ShowNotification(true)
