@@ -1,8 +1,16 @@
--- الرابط الأساسي للمستودع الخاص بك (استخدمنا هنا روابط Raw مباشرة لملفاتك)
-local baseUrl = "https://raw.githubusercontent.com/xXYBG5Xx/RedFox-Zero-Hub/main/"
+local Hub = {}
+local UI = loadstring(game:HttpGet("https://raw.githubusercontent.com/xXYBG5Xx/Core-X-Hub/main/ui.lua"))()
 
--- 1. تحميل ملف الأوامر والوظائف وتجهيزه في الذاكرة
-_G.RedFoxCommands = loadstring(game:HttpGet(baseUrl .. "commands.lua"))()
+function Hub.Init()
+    local success, err = pcall(function()
+        UI.CreateMain()
+    end)
 
--- 2. تشغيل ملف الواجهة (UI) واظهاره على الشاشة
-loadstring(game:HttpGet(baseUrl .. "ui.lua"))()
+    if success then
+        UI.Notify("Script status", "عمل (تمت عملية الحقن بنجاح)", 4)
+    else
+        UI.Notify("Script status", "فشل التحميل: " .. tostring(err), 5)
+    end
+end
+
+return Hub
